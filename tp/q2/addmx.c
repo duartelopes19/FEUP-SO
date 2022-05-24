@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
     printf("\n");
   } */
 
-  printf("%dx%d\n",nCols2,nRows2);
+  printf("%dx%d\n",nRows2,nCols2);
   for (int i = 0; i < nRows2; i++)
   {
     for (int j = 0; j < nCols2; j++)
