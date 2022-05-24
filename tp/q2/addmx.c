@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 64
 
@@ -128,6 +129,33 @@ int main(int argc, char* argv[]) {
       return EXIT_FAILURE;
   }
 
+
+  pid_t pids[nCols2];
+  int i;
+  int n = nCols2;
+
+  /* Start children. */
+  for (i = 0; i < n; ++i) {
+    if ((pids[i] = fork()) < 0) {
+      perror("fork");
+      abort();
+    } else if (pids[i] == 0) {
+      for(int j = 0; j < nRows2; j++) {
+        *(pmatRes + (i * nRows2 + j)) = *(pmat1 + (i * nRows2 + j)) + *(pmat2 + (i * nRows2 + j));
+      }
+      exit(0);
+    }
+  }
+
+  /* Wait for children to exit. */
+  int status;
+  pid_t pid;
+  while (n > 0) {
+    pid = wait(&status);
+    --n;  // TODO(pts): Remove pid from the pids array.
+  }
+
+
   printf("matrix1\n");
   for (int i = 0; i < nRows1; i++)
   {
@@ -144,6 +172,16 @@ int main(int argc, char* argv[]) {
     for (int j = 0; j < nCols2; j++)
     {
       printf("%d ", *(pmat2 + (j * nRows2 + i)));
+    }
+    printf("\n");
+  }
+
+  printf("matrixRes\n");
+  for (int i = 0; i < nRows2; i++)
+  {
+    for (int j = 0; j < nCols2; j++)
+    {
+      printf("%d ", *(pmatRes + (j * nRows2 + i)));
     }
     printf("\n");
   }
