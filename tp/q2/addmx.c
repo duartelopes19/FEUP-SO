@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 
 #define BUFFER_SIZE 64
 
@@ -18,8 +19,8 @@ int main(int argc, char* argv[]) {
   char buffer[BUFFER_SIZE];
   memset(buffer, 0, BUFFER_SIZE);
 
-  // Checking for errors
   stream = fopen(argv[1], "r");
+  // checking for errors
   if(stream == NULL) {
       perror("ERROR");
       return EXIT_FAILURE;
@@ -32,29 +33,48 @@ int main(int argc, char* argv[]) {
       fseek(stream, 0, SEEK_SET);
   }
 
-  // Reading matrix dimensions and creating the matrix
+  // reading matrix dimensions
   fscanf(stream, "%[^\n]", buffer);
   getc(stream);
   int nRows1 = atoi(buffer);
   int nCols1 = atoi(strchr(buffer, 'x') + 1);
-  int matrix1[nCols1][nRows1];  
 
-  // Filling the matrix
+  // using mmap()
+  int* m_ptr;
+  m_ptr = mmap(NULL, 3*nRows1*nCols1*sizeof(int), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+
+  if (m_ptr == MAP_FAILED) {
+    perror("Error");
+    return EXIT_FAILURE;
+  }
+
+  // matrix pointers
+  int* pmat1 = m_ptr;
+  int* pmat2 = m_ptr + (nRows1 * nCols1);
+  int* pmatRes = m_ptr + (2 * nRows1 * nCols1);
+
+  // filling the matrix1
   for (int i = 0; i < nRows1; i++)
   {
     memset(buffer, 0, BUFFER_SIZE);
     fscanf(stream, "%[^\n]", buffer);
     getc(stream);
-    int v = 0;
+    char* temp = buffer;
     for(int j = 0; j < nCols1; j++){
-      int num = atoi(buffer + v);
-      v += num_algorism(num) + 1;
-      matrix1[j][i] = num; 
+      int num = atoi(temp);
+      char str[32];
+      memset(str, 0, 32);
+      sprintf(str, "%d", num);
+      temp = strstr(temp, str);
+      temp += num_algorism(num) + 1;
+      printf("%d ", num);
+      // accessing matrix1 in the maped memory
+      *(pmat1 + (j * nRows1 + i)) = num; 
     }
   }
   
   printf("The size of the matrix 1 is %d x %d\n", nRows1, nCols1);
-
+ 
   if(fclose(stream) != 0){
       return EXIT_FAILURE;
   }
@@ -77,24 +97,28 @@ int main(int argc, char* argv[]) {
   int nRows2 = atoi(buffer);
   int nCols2 = atoi(strchr(buffer, 'x') + 1);
   
-  // Checking if operation is valid
+  // checking if operation is valid
   if(nRows1 != nRows2 || nCols1 != nCols2){
       printf("Imcompatible matrices\n");
       return EXIT_SUCCESS;
   }
-
-  int matrix2[nCols2][nRows2];
 
   for (int i = 0; i < nRows2; i++)
   {
     memset(buffer, 0, BUFFER_SIZE);
     fscanf(stream, "%[^\n]", buffer);
     getc(stream);
-    int v = 0;
+    char* temp = buffer;
     for(int j = 0; j < nCols2; j++){
-      int num = atoi(buffer + v);
-      v += num_algorism(num) + 1;
-      matrix2[j][i] = num; 
+      int num = atoi(temp);
+      char str[32];
+      memset(str, 0, 32);
+      sprintf(str, "%d", num);
+      temp = strstr(temp, str);
+      temp += num_algorism(num) + 1;
+      printf("%d ", num);
+      // accessing matrix2 in the maped memory
+      *(pmat2 + (j * nRows2 + i)) = num;
     }
   }
 
@@ -104,20 +128,22 @@ int main(int argc, char* argv[]) {
       return EXIT_FAILURE;
   }
 
+  printf("matrix1\n");
   for (int i = 0; i < nRows1; i++)
   {
     for (int j = 0; j < nCols1; j++)
     {
-      printf("%d ",matrix1[j][i]);
+      printf("%d ", *(pmat1 + (j * nRows1 + i)));
     }
     printf("\n");
   }
   
+  printf("matrix2\n");
   for (int i = 0; i < nRows2; i++)
   {
     for (int j = 0; j < nCols2; j++)
     {
-      printf("%d ",matrix2[j][i]);
+      printf("%d ", *(pmat2 + (j * nRows2 + i)));
     }
     printf("\n");
   }
