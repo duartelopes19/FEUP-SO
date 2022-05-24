@@ -68,13 +68,13 @@ int main(int argc, char* argv[]) {
       sprintf(str, "%d", num);
       temp = strstr(temp, str);
       temp += num_algorism(num) + 1;
-      printf("%d ", num);
+      //printf("%d ", num);
       // accessing matrix1 in the maped memory
       *(pmat1 + (j * nRows1 + i)) = num; 
     }
   }
   
-  printf("The size of the matrix 1 is %d x %d\n", nRows1, nCols1);
+  //printf("The size of the matrix 1 is %d x %d\n", nRows1, nCols1);
  
   if(fclose(stream) != 0){
       return EXIT_FAILURE;
@@ -117,13 +117,13 @@ int main(int argc, char* argv[]) {
       sprintf(str, "%d", num);
       temp = strstr(temp, str);
       temp += num_algorism(num) + 1;
-      printf("%d ", num);
+      //printf("%d ", num);
       // accessing matrix2 in the maped memory
       *(pmat2 + (j * nRows2 + i)) = num;
     }
   }
 
-  printf("The size of the matrix 2 is %d x %d\n", nRows2, nCols2);
+  //printf("The size of the matrix 2 is %d x %d\n", nRows2, nCols2);
 
   if(fclose(stream) != 0){
       return EXIT_FAILURE;
@@ -131,20 +131,27 @@ int main(int argc, char* argv[]) {
 
 
   pid_t pids[nCols2];
-  int i;
+  int id, col;
   int n = nCols2;
-
+  
   /* Start children. */
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     if ((pids[i] = fork()) < 0) {
       perror("fork");
       abort();
-    } else if (pids[i] == 0) {
-      for(int j = 0; j < nRows2; j++) {
-        *(pmatRes + (i * nRows2 + j)) = *(pmat1 + (i * nRows2 + j)) + *(pmat2 + (i * nRows2 + j));
-      }
-      exit(0);
     }
+    if(pids[i]==0) {
+      id = getpid();
+      col = i;
+      break;
+    }
+  }
+
+  if (id == getpid()) {
+    for(int j = 0; j < nRows2; j++) {
+      *(pmatRes + (col * nRows2 + j)) = *(pmat1 + (col * nRows2 + j)) + *(pmat2 + (col * nRows2 + j));
+    }
+    exit(0);
   }
 
   /* Wait for children to exit. */
@@ -156,7 +163,7 @@ int main(int argc, char* argv[]) {
   }
 
 
-  printf("matrix1\n");
+/*   printf("matrix1\n");
   for (int i = 0; i < nRows1; i++)
   {
     for (int j = 0; j < nCols1; j++)
@@ -174,9 +181,9 @@ int main(int argc, char* argv[]) {
       printf("%d ", *(pmat2 + (j * nRows2 + i)));
     }
     printf("\n");
-  }
+  } */
 
-  printf("matrixRes\n");
+  printf("%dx%d\n",nCols2,nRows2);
   for (int i = 0; i < nRows2; i++)
   {
     for (int j = 0; j < nCols2; j++)
