@@ -39,6 +39,33 @@ int main() {
         read(pipefds1[0], readmessage, sizeof(readmessage));
         printf("In Child: Reading from pipe 1 – Message is %s\n", readmessage);
         //process the message recieved to pipe2writemessage
+        //----read from file cypher.txt to array arr----
+        FILE* inp;
+        char arr[100][100];
+        int i = 0;
+        int word_count = 0;
+        char c;
+        int char_count = 0;
+
+        inp = fopen("cypher.txt", "r");
+
+        while ((c = fgetc(inp)) != EOF) {
+            if (c == ' ' || c == '\n') {
+
+                arr[word_count][char_count] = '\0'; //Terminate the string
+                char_count = 0; //Reset the counter.
+                word_count++;
+            }
+            else {
+                arr[word_count][char_count] = c;
+
+                if (char_count < 99)
+                    char_count++;
+                else
+                    char_count = 0;
+            }
+        }
+        //----------------------------
         printf("In Child: Writing to pipe 2 – Message is %s\n", pipe2writemessage);
         write(pipefds2[1], pipe2writemessage, sizeof(pipe2writemessage));
     }
