@@ -17,11 +17,17 @@ int num_algorism(int num) {
 }
 
 int main(int argc, char* argv[]) {
+  if(argc==1) {
+    printf("usage: addmx file1 file2\n");
+    return EXIT_SUCCESS;
+  }
+
   FILE* stream;
   char buffer[BUFFER_SIZE];
   memset(buffer, 0, BUFFER_SIZE);
 
   stream = fopen(argv[1], "r");
+
   // checking for errors
   if(stream == NULL) {
       perror("ERROR");
@@ -56,8 +62,7 @@ int main(int argc, char* argv[]) {
   int* pmatRes = m_ptr + (2 * nRows1 * nCols1);
 
   // filling the matrix1
-  for (int i = 0; i < nRows1; i++)
-  {
+  for (int i = 0; i < nRows1; i++) {
     memset(buffer, 0, BUFFER_SIZE);
     fscanf(stream, "%[^\n]", buffer);
     getc(stream);
@@ -69,13 +74,10 @@ int main(int argc, char* argv[]) {
       sprintf(str, "%d", num);
       temp = strstr(temp, str);
       temp += num_algorism(num) + 1;
-      //printf("%d ", num);
       // accessing matrix1 in the maped memory
       *(pmat1 + (j * nRows1 + i)) = num; 
     }
   }
-  
-  //printf("The size of the matrix 1 is %d x %d\n", nRows1, nCols1);
  
   if(fclose(stream) != 0){
       return EXIT_FAILURE;
@@ -118,18 +120,14 @@ int main(int argc, char* argv[]) {
       sprintf(str, "%d", num);
       temp = strstr(temp, str);
       temp += num_algorism(num) + 1;
-      //printf("%d ", num);
       // accessing matrix2 in the maped memory
       *(pmat2 + (j * nRows2 + i)) = num;
     }
   }
 
-  //printf("The size of the matrix 2 is %d x %d\n", nRows2, nCols2);
-
   if(fclose(stream) != 0) {
       return EXIT_FAILURE;
   }
-
 
   pid_t pids[nCols2];
   int id, col;
@@ -148,6 +146,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  /* Calculate collums in each child process */
   if (id == getpid()) {
     for(int j = 0; j < nRows2; j++) {
       *(pmatRes + (col * nRows2 + j)) = *(pmat1 + (col * nRows2 + j)) + *(pmat2 + (col * nRows2 + j));
@@ -161,29 +160,8 @@ int main(int argc, char* argv[]) {
     if(wait(&status)==-1) {
       perror("wait");
     }
-    --n;  // TODO(pts): Remove pid from the pids array.
+    --n;
   }
-
-
-/*   printf("matrix1\n");
-  for (int i = 0; i < nRows1; i++)
-  {
-    for (int j = 0; j < nCols1; j++)
-    {
-      printf("%d ", *(pmat1 + (j * nRows1 + i)));
-    }
-    printf("\n");
-  }
-  
-  printf("matrix2\n");
-  for (int i = 0; i < nRows2; i++)
-  {
-    for (int j = 0; j < nCols2; j++)
-    {
-      printf("%d ", *(pmat2 + (j * nRows2 + i)));
-    }
-    printf("\n");
-  } */
 
   printf("%dx%d\n",nRows2,nCols2);
   for (int i = 0; i < nRows2; i++)
