@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 64
 
@@ -99,7 +100,7 @@ int main(int argc, char* argv[]) {
   int nCols2 = atoi(strchr(buffer, 'x') + 1);
   
   // checking if operation is valid
-  if(nRows1 != nRows2 || nCols1 != nCols2){
+  if(nRows1 != nRows2 || nCols1 != nCols2) {
       printf("Imcompatible matrices\n");
       return EXIT_SUCCESS;
   }
@@ -125,7 +126,7 @@ int main(int argc, char* argv[]) {
 
   //printf("The size of the matrix 2 is %d x %d\n", nRows2, nCols2);
 
-  if(fclose(stream) != 0){
+  if(fclose(stream) != 0) {
       return EXIT_FAILURE;
   }
 
@@ -156,9 +157,10 @@ int main(int argc, char* argv[]) {
 
   /* Wait for children to exit. */
   int status;
-  pid_t pid;
   while (n > 0) {
-    pid = wait(&status);
+    if(wait(&status)==-1) {
+      perror("wait");
+    }
     --n;  // TODO(pts): Remove pid from the pids array.
   }
 
