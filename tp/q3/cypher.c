@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<unistd.h>
+#include<stdlib.h>
 
 int main() {
     int pipefds1[2], pipefds2[2];
