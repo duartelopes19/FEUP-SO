@@ -3,13 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 64
+#define BUFFER_SIZE 1000
 
 int main(int argc, char* argv[]) {
   char buffer[BUFFER_SIZE];
   FILE* stream;
 
-  stream = fopen(argv[1], "r");
+  char str[] = "usage: phrases [-l] file";
+  if(argc == 1) {
+    printf("%s\n", str);
+    return EXIT_SUCCESS;
+  }
+
+  if(strcmp(argv[1],"-l")!=0){
+    stream = fopen(argv[1], "r");
+  } else {
+    stream = fopen(argv[2], "r");
+  }
+  
   if(stream == NULL) {
       perror("Error");
       return EXIT_FAILURE;
@@ -23,18 +34,47 @@ int main(int argc, char* argv[]) {
   }
 
   size_t block_size;
+  int count=1;
+  if(strcmp(argv[1],"-l")==0){
+    printf("[1] ");
+  }
 
   while (1) {
     memset(buffer, 0, BUFFER_SIZE);
     block_size = fread(buffer, 1, BUFFER_SIZE - 1, stream);
 
-    printf("%s", buffer);
+    
+    for(int i=0; buffer[i]!=0; i++){
+      char ch = buffer[i];
+      if(ch=='\n') continue;
+      if(strcmp(argv[1],"-l")==0){
+      printf("%c", buffer[i]);
+      }
+      if(ch == '!'||ch == '?'||ch == '.'){
+        count++;
+        if(strcmp(argv[1],"-l")==0){
+        printf("\n");
+        printf("[");
+        printf("%i", count);
+        printf("]");
+        if(buffer[i+1]!=' '){
+          printf(" ");
+        }
+        }
+      }
+    }
 
     if(block_size != BUFFER_SIZE - 1) {
-      printf("\n");
       break;
     }
+
   }
+
+  if(strcmp(argv[1],"-l")!=0){
+    printf("%i",count);
+  }
+
+  printf("\n");
 
   return EXIT_SUCCESS;
 }
