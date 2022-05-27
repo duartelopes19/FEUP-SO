@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
   FILE* stream;
 
   char str[] = "usage: phrases [-l] file";
-  if(sizeof(strcmp(argv[1],"")==0)){
+  if(argc == 1) {
     printf("%s\n", str);
     return EXIT_SUCCESS;
   }
