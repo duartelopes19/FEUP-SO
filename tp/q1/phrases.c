@@ -9,6 +9,12 @@ int main(int argc, char* argv[]) {
   char buffer[BUFFER_SIZE];
   FILE* stream;
 
+  char str[] = "usage: phrases [-l] file";
+  if(sizeof(strcmp(argv[1],"")==0)){
+    printf("%s\n", str);
+    return EXIT_SUCCESS;
+  }
+
   if(strcmp(argv[1],"-l")!=0){
     stream = fopen(argv[1], "r");
   } else {
@@ -29,7 +35,7 @@ int main(int argc, char* argv[]) {
 
   size_t block_size;
   int count=1;
-  if(strcmp(argv[1],"-l")!=0){
+  if(strcmp(argv[1],"-l")==0){
     printf("[1] ");
   }
 
@@ -41,12 +47,12 @@ int main(int argc, char* argv[]) {
     for(int i=0; buffer[i]!=0; i++){
       char ch = buffer[i];
       if(ch=='\n') continue;
-      if(strcmp(argv[1],"-l")!=0){
+      if(strcmp(argv[1],"-l")==0){
       printf("%c", buffer[i]);
       }
       if(ch == '!'||ch == '?'||ch == '.'){
         count++;
-        if(strcmp(argv[1],"-l")!=0){
+        if(strcmp(argv[1],"-l")==0){
         printf("\n");
         printf("[");
         printf("%i", count);
@@ -64,7 +70,7 @@ int main(int argc, char* argv[]) {
 
   }
 
-  if(strcmp(argv[1],"-l")==0){
+  if(strcmp(argv[1],"-l")!=0){
     printf("%i",count);
   }
 
