@@ -8,3 +8,4 @@ phrases.o : phrases.c
 
 clean :
 	rm phrases *.o
+
